@@ -6,6 +6,8 @@
 [![X](https://img.shields.io/badge/X-@GitNutHub-ffffff?style=for-the-badge&logo=x&logoColor=000000)](https://x.com/GitNutHub)
 [![Community](https://img.shields.io/badge/X%20Community-Join-9945FF?style=for-the-badge&logo=x&logoColor=ffffff)](https://x.com/i/communities/2002937400993923086)
 
+### $GITNUT: ASVtGrpFmtS94mcjZkp799aedg6BoVwwrZssMNcBpump
+
 
 
 **GitNut** is an open-source pipeline that brings **verifiable software provenance** to Solana.
