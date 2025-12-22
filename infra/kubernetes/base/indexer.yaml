@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: indexer
+  namespace: gitnut
+  labels:
+    app: indexer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: indexer
+  template:
+    metadata:
+      labels:
+        app: indexer
+    spec:
+      containers:
+        - name: indexer
+          image: ghcr.io/gitnut/gitnut-indexer:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+              name: metrics
+          envFrom:
+            - configMapRef:
+                name: gitnut-config
+            - secretRef:
+                name: gitnut-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8082
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8082
+            initialDelaySeconds: 20
+            periodSeconds: 10

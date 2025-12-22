@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitnut-config
+  namespace: gitnut
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  API_PORT: "8080"
+  WEB_PORT: "3000"
+  WORKER_METRICS_PORT: "8081"
+  INDEXER_METRICS_PORT: "8082"
+  DATABASE_URL: "postgresql://gitnut:gitnut@postgres:5432/gitnut?schema=public"
+  REDIS_URL: "redis://redis:6379"
+  S3_ENDPOINT: "http://minio:9000"
+  S3_REGION: "us-east-1"
+  S3_BUCKET_ARTIFACTS: "gitnut-artifacts"
+  S3_BUCKET_ATTESTATIONS: "gitnut-attestations"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4318"

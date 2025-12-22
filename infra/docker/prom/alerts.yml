@@ -1,0 +1,20 @@
+groups:
+  - name: gitnut-alerts
+    rules:
+      - alert: GitNutApiHighErrorRate
+        expr: sum(rate(http_requests_total{service="gitnut-api",status=~"5.."}[5m])) > 1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GitNut API high 5xx error rate"
+          description: "API is returning >1 5xx requests/sec for 2 minutes."
+
+      - alert: GitNutQueueBacklog
+        expr: gitnut_queue_depth > 500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GitNut queue backlog"
+          description: "Queue depth is above 500 for 5 minutes."

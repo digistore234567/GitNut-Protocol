@@ -1,0 +1,42 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "gitnut.fullname" . }}-ingress
+  labels:
+    {{- include "gitnut.labels" . | nindent 4 }}
+  {{- if .Values.ingress.className }}
+  annotations:
+    kubernetes.io/ingress.class: {{ .Values.ingress.className }}
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+  {{- end }}
+spec:
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.webHost }}
+        - {{ .Values.ingress.apiHost }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.webHost }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "gitnut.fullname" . }}-web
+                port:
+                  number: 80
+    - host: {{ .Values.ingress.apiHost }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "gitnut.fullname" . }}-api
+                port:
+                  number: 8080
+{{- end -}}

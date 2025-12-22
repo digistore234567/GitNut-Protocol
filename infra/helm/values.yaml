@@ -1,0 +1,54 @@
+image:
+  registry: ghcr.io/gitnut
+  pullPolicy: IfNotPresent
+  tag: latest
+
+ingress:
+  enabled: true
+  className: nginx
+  webHost: gitnut.example.com
+  apiHost: api.gitnut.example.com
+  tls:
+    enabled: false
+    secretName: gitnut-tls
+
+postgres:
+  enabled: true
+  image: postgres:16-alpine
+  storage: 20Gi
+  user: gitnut
+  password: gitnut
+  db: gitnut
+
+redis:
+  enabled: true
+  image: redis:7-alpine
+  storage: 5Gi
+
+minio:
+  enabled: true
+  image: minio/minio:RELEASE.2025-01-20T00-00-00Z
+  rootUser: gitnut
+  rootPassword: gitnut-password-change-me
+  buckets:
+    - gitnut-artifacts
+    - gitnut-attestations
+
+config:
+  logLevel: info
+  otelEndpoint: http://otel-collector:4318
+  s3:
+    region: us-east-1
+
+secrets:
+  githubClientId: replace
+  githubClientSecret: replace
+  jwtSecret: replace
+  sessionSecret: replace
+  walletSigninDomain: gitnut.example.com
+
+resources:
+  api: {}
+  web: {}
+  worker: {}
+  indexer: {}

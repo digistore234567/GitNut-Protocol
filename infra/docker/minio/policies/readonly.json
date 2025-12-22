@@ -1,0 +1,19 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowReadOnly",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::gitnut-artifacts",
+        "arn:aws:s3:::gitnut-artifacts/*",
+        "arn:aws:s3:::gitnut-attestations",
+        "arn:aws:s3:::gitnut-attestations/*"
+      ]
+    }
+  ]
+}

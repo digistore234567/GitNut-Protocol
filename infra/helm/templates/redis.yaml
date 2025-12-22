@@ -1,0 +1,56 @@
+{{- if .Values.redis.enabled -}}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "gitnut.fullname" . }}-redis
+  labels:
+    {{- include "gitnut.labels" . | nindent 4 }}
+    app.gitnut.io/component: redis
+spec:
+  serviceName: {{ include "gitnut.fullname" . }}-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.gitnut.io/component: redis
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.gitnut.io/component: redis
+    spec:
+      containers:
+        - name: redis
+          image: {{ .Values.redis.image | quote }}
+          args: ["redis-server","--appendonly","yes"]
+          ports:
+            - containerPort: 6379
+              name: redis
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: {{ .Values.redis.storage | quote }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "gitnut.fullname" . }}-redis
+  labels:
+    {{- include "gitnut.labels" . | nindent 4 }}
+    app.gitnut.io/component: redis
+spec:
+  selector:
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.gitnut.io/component: redis
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+{{- end -}}

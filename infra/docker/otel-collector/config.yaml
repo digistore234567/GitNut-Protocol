@@ -1,0 +1,43 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 5s
+    send_batch_size: 1024
+  memory_limiter:
+    check_interval: 2s
+    limit_mib: 512
+    spike_limit_mib: 128
+  attributes/gitnut:
+    actions:
+      - key: service.namespace
+        action: insert
+        value: gitnut
+
+exporters:
+  prometheus:
+    endpoint: 0.0.0.0:8888
+    namespace: gitnut
+  logging:
+    loglevel: info
+
+service:
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/gitnut, batch]
+      exporters: [prometheus, logging]
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/gitnut, batch]
+      exporters: [logging]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/gitnut, batch]
+      exporters: [logging]

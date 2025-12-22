@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gitnut.fullname" . }}-config
+  labels:
+    {{- include "gitnut.labels" . | nindent 4 }}
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
+  API_PORT: "8080"
+  WEB_PORT: "3000"
+  WORKER_METRICS_PORT: "8081"
+  INDEXER_METRICS_PORT: "8082"
+  DATABASE_URL: "postgresql://{{ .Values.postgres.user }}:{{ .Values.postgres.password }}@{{ include "gitnut.fullname" . }}-postgres:5432/{{ .Values.postgres.db }}?schema=public"
+  REDIS_URL: "redis://{{ include "gitnut.fullname" . }}-redis:6379"
+  S3_ENDPOINT: "http://{{ include "gitnut.fullname" . }}-minio:9000"
+  S3_REGION: {{ .Values.config.s3.region | quote }}
+  S3_BUCKET_ARTIFACTS: "gitnut-artifacts"
+  S3_BUCKET_ATTESTATIONS: "gitnut-attestations"
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.config.otelEndpoint | quote }}

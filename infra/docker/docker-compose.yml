@@ -1,0 +1,157 @@
+version: "3.9"
+
+# GitNut infra stack for local development:
+# - postgres (metadata)
+# - redis (queue / cache)
+# - minio (S3-compatible object storage for artifacts)
+# - prometheus + grafana (metrics dashboards)
+# - otel-collector (traces/metrics/logs routing)
+#
+# This file intentionally focuses on infra services.
+# App services (api/web/worker/indexer) should live in the repo root compose
+# or be added here by your deployment profile.
+
+networks:
+  gitnut:
+    driver: bridge
+
+volumes:
+  gitnut_postgres_data:
+  gitnut_redis_data:
+  gitnut_minio_data:
+  gitnut_grafana_data:
+  gitnut_prometheus_data:
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gitnut-postgres
+    restart: unless-stopped
+    networks: [gitnut]
+    environment:
+      POSTGRES_USER: gitnut
+      POSTGRES_PASSWORD: gitnut
+      POSTGRES_DB: gitnut
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - gitnut_postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gitnut -d gitnut"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: gitnut-redis
+    restart: unless-stopped
+    networks: [gitnut]
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - gitnut_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  minio:
+    image: minio/minio:RELEASE.2025-01-20T00-00-00Z
+    container_name: gitnut-minio
+    restart: unless-stopped
+    networks: [gitnut]
+    environment:
+      MINIO_ROOT_USER: gitnut
+      MINIO_ROOT_PASSWORD: gitnut-password-change-me
+      MINIO_BROWSER_REDIRECT_URL: http://localhost:9001
+    command: ["server", "/data", "--console-address", ":9001"]
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - gitnut_minio_data:/data
+      - ./minio/policies:/policies:ro
+    healthcheck:
+      test: ["CMD", "sh", "-c", "wget -qO- http://localhost:9000/minio/health/ready >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # One-shot bucket initialization
+  minio-init:
+    image: minio/mc:RELEASE.2025-01-10T00-00-00Z
+    container_name: gitnut-minio-init
+    networks: [gitnut]
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      set -e;
+      mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD;
+      mc mb -p local/gitnut-artifacts || true;
+      mc anonymous set download local/gitnut-artifacts || true;
+      mc mb -p local/gitnut-attestations || true;
+      mc anonymous set download local/gitnut-attestations || true;
+      echo "minio-init done";
+    environment:
+      MINIO_ROOT_USER: gitnut
+      MINIO_ROOT_PASSWORD: gitnut-password-change-me
+    restart: "no"
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.110.0
+    container_name: gitnut-otel-collector
+    restart: unless-stopped
+    networks: [gitnut]
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector/config.yaml:/etc/otelcol/config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # metrics
+    depends_on:
+      prometheus:
+        condition: service_started
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: gitnut-prometheus
+    restart: unless-stopped
+    networks: [gitnut]
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prom/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prom/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - gitnut_prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    container_name: gitnut-grafana
+    restart: unless-stopped
+    networks: [gitnut]
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin-change-me
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - gitnut_grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
+    depends_on:
+      prometheus:
+        condition: service_started

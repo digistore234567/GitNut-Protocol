@@ -1,0 +1,63 @@
+{
+  "id": null,
+  "uid": "gitnut-infra",
+  "title": "GitNut - Infra",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "tags": [
+    "gitnut",
+    "infra"
+  ],
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "OTel Collector Exported Metrics",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(otelcol_exporter_sent_metric_points[1m]))",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Postgres Connections",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "targets": [
+        {
+          "expr": "pg_stat_activity_count",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Redis Memory (if exported)",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "targets": [
+        {
+          "expr": "redis_memory_used_bytes",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

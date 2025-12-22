@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: gitnut
+
+resources:
+  - ../../base/namespace.yaml
+  - ../../base/configmap.yaml
+  - ../../base/secret.yaml
+  - ../../base/postgres.yaml
+  - ../../base/redis.yaml
+  - ../../base/api.yaml
+  - ../../base/worker.yaml
+  - ../../base/web.yaml
+  - ../../base/indexer.yaml
+  - ../../base/ingress.yaml
+
+replicas:
+  - name: api
+    count: 4
+  - name: web
+    count: 3
+  - name: worker
+    count: 2
+  - name: indexer
+    count: 1
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: gitnut-config
+    patch: |-
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: gitnut-config
+        namespace: gitnut
+      data:
+        NODE_ENV: "production"
+        LOG_LEVEL: "info"
