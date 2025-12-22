@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitnut.dev/schemas/sbom-attestation.v1.json",
+  "title": "sbom-attestation.v1",
+  "description": "SBOM attachment schema describing the SBOM artifact referenced by a release.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "format",
+    "sha256",
+    "uri",
+    "generatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "1.0.0"
+      ]
+    },
+    "format": {
+      "type": "string",
+      "enum": [
+        "spdx-json",
+        "cyclonedx-json"
+      ]
+    },
+    "sha256": {
+      "type": "string",
+      "description": "Lowercase hex SHA-256 digest.",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "minLength": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "version": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectSlug",
+        "version"
+      ],
+      "properties": {
+        "projectSlug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+){0,39}$"
+        },
+        "version": {
+          "type": "string",
+          "description": "Semantic Versioning string.",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+        },
+        "sourceArchiveSha256": {
+          "type": "string",
+          "description": "Lowercase hex SHA-256 digest.",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    }
+  },
+  "defs": {
+    "semver": {
+      "type": "string",
+      "description": "Semantic Versioning string.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "sha256": {
+      "type": "string",
+      "description": "Lowercase hex SHA-256 digest.",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "ed25519PublicKey": {
+      "type": "string",
+      "description": "Ed25519 public key as base58 string.",
+      "minLength": 32,
+      "maxLength": 64
+    },
+    "solanaPubkey": {
+      "type": "string",
+      "description": "Solana public key as base58 string.",
+      "minLength": 32,
+      "maxLength": 64
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "minLength": 1
+    },
+    "datetime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

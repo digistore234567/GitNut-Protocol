@@ -1,0 +1,386 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitnut.dev/schemas/build-attestation.v1.json",
+  "title": "build-attestation.v1",
+  "description": "Attestation that binds a build environment and commands to deterministic build artifacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "type",
+    "issuedAt",
+    "subject",
+    "claims",
+    "signature"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "1.0.0"
+      ]
+    },
+    "type": {
+      "type": "string",
+      "const": "build-attestation"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issuer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "publicKey": {
+          "type": "string",
+          "description": "Ed25519 public key as base58 string.",
+          "minLength": 32,
+          "maxLength": 64
+        },
+        "wallet": {
+          "type": "string",
+          "description": "Solana public key as base58 string.",
+          "minLength": 32,
+          "maxLength": 64
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectSlug",
+        "version"
+      ],
+      "properties": {
+        "projectSlug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+){0,39}$"
+        },
+        "version": {
+          "type": "string",
+          "description": "Semantic Versioning string.",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "provider": {
+              "type": "string",
+              "enum": [
+                "github",
+                "gitlab",
+                "bitbucket",
+                "generic"
+              ]
+            },
+            "repo": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 200
+            },
+            "ref": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{40}$"
+            },
+            "subdir": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "builder",
+        "inputs",
+        "outputs",
+        "environment"
+      ],
+      "properties": {
+        "builder": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "strategy"
+          ],
+          "properties": {
+            "strategy": {
+              "type": "string",
+              "enum": [
+                "node",
+                "rust",
+                "python",
+                "static",
+                "custom"
+              ]
+            },
+            "containerImage": {
+              "type": "string",
+              "maxLength": 300
+            },
+            "containerDigest": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "commands": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "maxItems": 200
+            }
+          }
+        },
+        "inputs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "sourceArchiveSha256"
+          ],
+          "properties": {
+            "sourceArchiveSha256": {
+              "type": "string",
+              "description": "Lowercase hex SHA-256 digest.",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "dependencyLockfiles": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "path",
+                  "sha256"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "maxLength": 2000
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "description": "Lowercase hex SHA-256 digest.",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                }
+              },
+              "maxItems": 2000
+            }
+          }
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "os": {
+              "type": "string",
+              "maxLength": 80
+            },
+            "arch": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "cpuCores": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 128
+            },
+            "memoryMB": {
+              "type": "integer",
+              "minimum": 64,
+              "maximum": 262144
+            },
+            "network": {
+              "type": "string",
+              "enum": [
+                "none",
+                "restricted",
+                "default"
+              ]
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 86400
+            }
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "sha256",
+              "sizeBytes",
+              "kind"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "build-archive",
+                  "binary",
+                  "bundle",
+                  "static-site",
+                  "library",
+                  "other"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "description": "Lowercase hex SHA-256 digest.",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "sizeBytes": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "uri": {
+                "type": "string",
+                "format": "uri",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "reproducibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "attempts": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            },
+            "matched": {
+              "type": "boolean"
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 20000
+            }
+          }
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "alg",
+        "value",
+        "payloadHash"
+      ],
+      "properties": {
+        "alg": {
+          "type": "string",
+          "enum": [
+            "ed25519"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "description": "Signature value as base64.",
+          "minLength": 16,
+          "maxLength": 512
+        },
+        "payloadHash": {
+          "type": "string",
+          "description": "Lowercase hex SHA-256 digest.",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "canonicalJson": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        },
+        "bundle": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        },
+        "docs": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "defs": {
+    "semver": {
+      "type": "string",
+      "description": "Semantic Versioning string.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "sha256": {
+      "type": "string",
+      "description": "Lowercase hex SHA-256 digest.",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "ed25519PublicKey": {
+      "type": "string",
+      "description": "Ed25519 public key as base58 string.",
+      "minLength": 32,
+      "maxLength": 64
+    },
+    "solanaPubkey": {
+      "type": "string",
+      "description": "Solana public key as base58 string.",
+      "minLength": 32,
+      "maxLength": 64
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "minLength": 1
+    },
+    "datetime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

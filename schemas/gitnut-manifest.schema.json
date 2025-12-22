@@ -1,0 +1,541 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitnut.dev/schemas/gitnut-manifest.schema.json",
+  "title": "gitnut-manifest.schema",
+  "description": "GitNut manifest describing how a repository is imported, built, stored, and anchored on Solana.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "project",
+    "source",
+    "build",
+    "outputs"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema version for this manifest document.",
+      "enum": [
+        "1.0.0"
+      ]
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "slug"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+){0,39}$"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "homepage": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40
+          },
+          "maxItems": 64
+        },
+        "contacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "x": {
+              "type": "string",
+              "description": "X/Twitter handle without @",
+              "pattern": "^[A-Za-z0-9_]{1,15}$"
+            },
+            "discord": {
+              "type": "string",
+              "maxLength": 64
+            },
+            "telegram": {
+              "type": "string",
+              "maxLength": 64
+            }
+          }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "repo",
+        "ref"
+      ],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": [
+            "github",
+            "gitlab",
+            "bitbucket",
+            "generic"
+          ]
+        },
+        "repo": {
+          "type": "string",
+          "description": "Repository locator. For GitHub: owner/repo.",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "ref": {
+          "type": "string",
+          "description": "Git ref used to import (branch, tag, or commit).",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "commit": {
+          "type": "string",
+          "description": "Resolved commit SHA (40 hex for Git).",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "subdir": {
+          "type": "string",
+          "description": "Optional subdirectory within the repo to treat as root.",
+          "maxLength": 500
+        },
+        "fetch": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "depth": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100000
+            },
+            "includeSubmodules": {
+              "type": "boolean"
+            },
+            "lfs": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strategy"
+      ],
+      "properties": {
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "node",
+            "rust",
+            "python",
+            "static",
+            "custom"
+          ]
+        },
+        "container": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "image": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "workdir": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            },
+            "network": {
+              "type": "string",
+              "enum": [
+                "none",
+                "restricted",
+                "default"
+              ]
+            },
+            "cpuCores": {
+              "type": "number",
+              "minimum": 0.1,
+              "maximum": 64
+            },
+            "memoryMB": {
+              "type": "integer",
+              "minimum": 64,
+              "maximum": 262144
+            },
+            "timeoutSeconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 86400
+            },
+            "env": {
+              "type": "object",
+              "description": "Whitelisted environment variables injected into the build.",
+              "additionalProperties": {
+                "type": "string",
+                "maxLength": 8192
+              }
+            }
+          }
+        },
+        "commands": {
+          "type": "array",
+          "description": "Command list executed in order inside the build sandbox.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "run"
+            ],
+            "properties": {
+              "run": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "shell": {
+                "type": "string",
+                "enum": [
+                  "sh",
+                  "bash",
+                  "pwsh",
+                  "cmd"
+                ]
+              },
+              "cwd": {
+                "type": "string",
+                "maxLength": 400
+              },
+              "allowNetwork": {
+                "type": "boolean"
+              },
+              "cacheKey": {
+                "type": "string",
+                "maxLength": 200
+              }
+            }
+          },
+          "minItems": 0,
+          "maxItems": 200
+        },
+        "artifacts": {
+          "type": "array",
+          "description": "Artifact globs collected after build.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "file",
+                  "dir"
+                ]
+              },
+              "stripPrefix": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "required": {
+                "type": "boolean"
+              }
+            }
+          },
+          "maxItems": 200
+        }
+      }
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "archive",
+        "metadata"
+      ],
+      "properties": {
+        "archive": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "format",
+            "hash"
+          ],
+          "properties": {
+            "format": {
+              "type": "string",
+              "enum": [
+                "tar.gz",
+                "zip"
+              ]
+            },
+            "hash": {
+              "type": "string",
+              "description": "Lowercase hex SHA-256 digest.",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "sizeBytes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "uri": {
+              "type": "string",
+              "format": "uri",
+              "minLength": 1
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sbom": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "hash": {
+                  "type": "string",
+                  "description": "Lowercase hex SHA-256 digest.",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "uri": {
+                  "type": "string",
+                  "format": "uri",
+                  "minLength": 1
+                },
+                "format": {
+                  "type": "string",
+                  "enum": [
+                    "spdx-json",
+                    "cyclonedx-json"
+                  ]
+                }
+              }
+            },
+            "sourceAttestation": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "hash": {
+                  "type": "string",
+                  "description": "Lowercase hex SHA-256 digest.",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "uri": {
+                  "type": "string",
+                  "format": "uri",
+                  "minLength": 1
+                }
+              }
+            },
+            "buildAttestation": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "hash": {
+                  "type": "string",
+                  "description": "Lowercase hex SHA-256 digest.",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "uri": {
+                  "type": "string",
+                  "format": "uri",
+                  "minLength": 1
+                }
+              }
+            },
+            "releaseAttestation": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "hash": {
+                  "type": "string",
+                  "description": "Lowercase hex SHA-256 digest.",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "uri": {
+                  "type": "string",
+                  "format": "uri",
+                  "minLength": 1
+                }
+              }
+            }
+          }
+        },
+        "anchor": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cluster": {
+              "type": "string",
+              "enum": [
+                "localnet",
+                "devnet",
+                "testnet",
+                "mainnet-beta"
+              ]
+            },
+            "programId": {
+              "type": "string",
+              "description": "Solana public key as base58 string.",
+              "minLength": 32,
+              "maxLength": 64
+            },
+            "projectPda": {
+              "type": "string",
+              "description": "Solana public key as base58 string.",
+              "minLength": 32,
+              "maxLength": 64
+            },
+            "versionPda": {
+              "type": "string",
+              "description": "Solana public key as base58 string.",
+              "minLength": 32,
+              "maxLength": 64
+            },
+            "tx": {
+              "type": "string",
+              "description": "Solana public key as base58 string.",
+              "minLength": 32,
+              "maxLength": 64
+            }
+          }
+        }
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "licensePolicy": {
+          "type": "string",
+          "description": "Name of a policy document applied to this import.",
+          "maxLength": 120
+        },
+        "contentPolicy": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "allowedHosts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "maxItems": 200
+        },
+        "blockedPaths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "maxItems": 500
+        },
+        "maxRepoSizeMB": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5000
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdBy": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "tool": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "toolVersion": {
+          "type": "string",
+          "description": "Semantic Versioning string.",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+        }
+      }
+    }
+  },
+  "defs": {
+    "semver": {
+      "type": "string",
+      "description": "Semantic Versioning string.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "sha256": {
+      "type": "string",
+      "description": "Lowercase hex SHA-256 digest.",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "ed25519PublicKey": {
+      "type": "string",
+      "description": "Ed25519 public key as base58 string.",
+      "minLength": 32,
+      "maxLength": 64
+    },
+    "solanaPubkey": {
+      "type": "string",
+      "description": "Solana public key as base58 string.",
+      "minLength": 32,
+      "maxLength": 64
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "minLength": 1
+    },
+    "datetime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

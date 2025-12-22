@@ -1,0 +1,336 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitnut.dev/schemas/release-attestation.v1.json",
+  "title": "release-attestation.v1",
+  "description": "Attestation that binds a release record to on-chain anchoring and off-chain artifact locations.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "type",
+    "issuedAt",
+    "subject",
+    "claims",
+    "signature"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "1.0.0"
+      ]
+    },
+    "type": {
+      "type": "string",
+      "const": "release-attestation"
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issuer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "publicKey": {
+          "type": "string",
+          "description": "Ed25519 public key as base58 string.",
+          "minLength": 32,
+          "maxLength": 64
+        },
+        "wallet": {
+          "type": "string",
+          "description": "Solana public key as base58 string.",
+          "minLength": 32,
+          "maxLength": 64
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "projectSlug",
+        "version"
+      ],
+      "properties": {
+        "projectSlug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+){0,39}$"
+        },
+        "version": {
+          "type": "string",
+          "description": "Semantic Versioning string.",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "provider": {
+              "type": "string",
+              "enum": [
+                "github",
+                "gitlab",
+                "bitbucket",
+                "generic"
+              ]
+            },
+            "repo": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 200
+            },
+            "ref": {
+              "type": "string",
+              "maxLength": 200
+            },
+            "commit": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{40}$"
+            },
+            "subdir": {
+              "type": "string",
+              "maxLength": 500
+            }
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifacts",
+        "onChain",
+        "policies"
+      ],
+      "properties": {
+        "artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "sha256",
+              "uri"
+            ],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "source-archive",
+                  "build-archive",
+                  "sbom",
+                  "attestation",
+                  "other"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "description": "Lowercase hex SHA-256 digest.",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "uri": {
+                "type": "string",
+                "format": "uri",
+                "minLength": 1
+              },
+              "contentType": {
+                "type": "string",
+                "maxLength": 120
+              },
+              "sizeBytes": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "onChain": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cluster",
+            "programId",
+            "projectPda",
+            "versionPda",
+            "tx"
+          ],
+          "properties": {
+            "cluster": {
+              "type": "string",
+              "enum": [
+                "localnet",
+                "devnet",
+                "testnet",
+                "mainnet-beta"
+              ]
+            },
+            "programId": {
+              "type": "string",
+              "description": "Solana public key as base58 string.",
+              "minLength": 32,
+              "maxLength": 64
+            },
+            "projectPda": {
+              "type": "string",
+              "description": "Solana public key as base58 string.",
+              "minLength": 32,
+              "maxLength": 64
+            },
+            "versionPda": {
+              "type": "string",
+              "description": "Solana public key as base58 string.",
+              "minLength": 32,
+              "maxLength": 64
+            },
+            "tx": {
+              "type": "string",
+              "description": "Solana public key as base58 string.",
+              "minLength": 32,
+              "maxLength": 64
+            }
+          }
+        },
+        "policies": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "licensePolicy": {
+              "type": "string",
+              "maxLength": 120
+            },
+            "contentPolicy": {
+              "type": "string",
+              "maxLength": 120
+            }
+          }
+        },
+        "verification": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sourceAttestationSha256": {
+              "type": "string",
+              "description": "Lowercase hex SHA-256 digest.",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "buildAttestationSha256": {
+              "type": "string",
+              "description": "Lowercase hex SHA-256 digest.",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "sbomSha256": {
+              "type": "string",
+              "description": "Lowercase hex SHA-256 digest.",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "alg",
+        "value",
+        "payloadHash"
+      ],
+      "properties": {
+        "alg": {
+          "type": "string",
+          "enum": [
+            "ed25519"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "description": "Signature value as base64.",
+          "minLength": 16,
+          "maxLength": 512
+        },
+        "payloadHash": {
+          "type": "string",
+          "description": "Lowercase hex SHA-256 digest.",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "links": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "canonicalJson": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        },
+        "bundle": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        },
+        "docs": {
+          "type": "string",
+          "format": "uri",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "defs": {
+    "semver": {
+      "type": "string",
+      "description": "Semantic Versioning string.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "sha256": {
+      "type": "string",
+      "description": "Lowercase hex SHA-256 digest.",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "ed25519PublicKey": {
+      "type": "string",
+      "description": "Ed25519 public key as base58 string.",
+      "minLength": 32,
+      "maxLength": 64
+    },
+    "solanaPubkey": {
+      "type": "string",
+      "description": "Solana public key as base58 string.",
+      "minLength": 32,
+      "maxLength": 64
+    },
+    "uri": {
+      "type": "string",
+      "format": "uri",
+      "minLength": 1
+    },
+    "datetime": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

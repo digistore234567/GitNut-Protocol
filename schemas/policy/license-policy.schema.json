@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://gitnut.dev/schemas/license-policy.schema.json",
+  "title": "license-policy.schema",
+  "description": "License allow/deny policy applied during repository import and publishing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "name",
+    "mode",
+    "rules"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "1.0.0"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "allowlist",
+        "denylist",
+        "mixed"
+      ]
+    },
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "action",
+          "match"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "allow",
+              "deny",
+              "warn"
+            ]
+          },
+          "match": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "spdx": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                },
+                "maxItems": 200
+              },
+              "textContains": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "maxItems": 50
+              }
+            }
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          }
+        }
+      }
+    },
+    "defaultAction": {
+      "type": "string",
+      "enum": [
+        "allow",
+        "deny",
+        "warn"
+      ]
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
