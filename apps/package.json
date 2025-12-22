@@ -1,0 +1,10 @@
+{
+  "name": "gitnut",
+  "private": true,
+  "packageManager": "pnpm@9.12.0",
+  "scripts": {
+    "dev:worker": "pnpm -C apps/worker dev",
+    "dev:cli": "pnpm -C apps/cli dev",
+    "dev:indexer": "pnpm -C apps/indexer dev"
+  }
+}
