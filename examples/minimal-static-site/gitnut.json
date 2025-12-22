@@ -1,0 +1,11 @@
+{
+  "schema": "https://schemas.gitnut.dev/gitnut-manifest.v1.json",
+  "name": "minimal-static-site",
+  "type": "static",
+  "entrypoints": ["public/index.html"],
+  "build": {
+    "command": "echo \"static\"",
+    "artifacts": ["public/index.html"]
+  },
+  "license": "MIT"
+}

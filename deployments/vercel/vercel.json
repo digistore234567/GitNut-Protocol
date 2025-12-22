@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm -C apps/web build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "framework": "nextjs",
+  "outputDirectory": "apps/web/.next",
+  "ignoreCommand": "node -e \"process.exit(0)\""
+}

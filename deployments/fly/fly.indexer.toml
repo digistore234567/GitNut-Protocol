@@ -1,0 +1,17 @@
+app = "gitnut-indexer"
+primary_region = "sjc"
+
+[build]
+  dockerfile = "apps/indexer/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  INDEXER_POLL_INTERVAL_MS = "1500"
+
+[processes]
+  app = "node dist/main.js"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 1024

@@ -1,0 +1,8 @@
+{
+  "owner": "octocat",
+  "repo": "Hello-World",
+  "ref": "main",
+  "description": "Sample fixture for GitNut tests",
+  "license": "MIT",
+  "createdAt": "2025-12-22T00:00:00.000Z"
+}

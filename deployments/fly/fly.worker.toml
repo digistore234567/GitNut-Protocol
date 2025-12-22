@@ -1,0 +1,17 @@
+app = "gitnut-worker"
+primary_region = "sjc"
+
+[build]
+  dockerfile = "apps/worker/Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  WORKER_CONCURRENCY = "2"
+
+[processes]
+  app = "node dist/index.js"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 1024
