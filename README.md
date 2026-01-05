@@ -3,7 +3,7 @@
 # GitNut
 
 [![Website](https://img.shields.io/badge/Website-gitnut.org-14F195?style=for-the-badge&logo=vercel&logoColor=000000)](https://gitnut.org/)
-[![X](https://img.shields.io/badge/X-@GitNutHub-ffffff?style=for-the-badge&logo=x&logoColor=000000)](https://x.com/GitNutXStar)
+[![X](https://img.shields.io/badge/X-@GitNutXStar-ffffff?style=for-the-badge&logo=x&logoColor=000000)](https://x.com/GitNutXStar)
 
 
 ### $GITNUTX: 5zPbpS5V1fmrcSH42Wd3b9CpGUJoeAyNk3dMrRtBpump
